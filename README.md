@@ -32,6 +32,7 @@
 * Android Navigation
 * Retrofit2
 * Glide
+* Room
 
 
 <!-- CONTRIBUTING -->
