@@ -1,11 +1,14 @@
 package com.aleiva.hcompose.ui.heroexplorer.activities
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.aleiva.hcompose.data.local.AppDatabase
 import com.aleiva.hcompose.data.model.Hero
 import com.aleiva.hcompose.repository.HeroRepository
 import com.aleiva.hcompose.ui.heroexplorer.components.HeroList
@@ -18,10 +21,12 @@ import com.aleiva.hcompose.utils.Result
 
 @Composable
 fun HeroBrowser(navController: NavController) {
+  val context = LocalContext.current
   val (searchTerm, setSearchTerm) = remember { mutableStateOf("") }
   val (heroes, setHeroes) = remember { mutableStateOf<List<Hero>?>(listOf<Hero>()) }
   val (isLoading, setIsLoading) = remember { mutableStateOf(false) }
-  val heroRepository = HeroRepository()
+  val heroDao = AppDatabase.getInstance(context).heroDao()
+  val heroRepository = HeroRepository(heroDao = heroDao)
   
   
   LaunchedEffect(searchTerm) {
@@ -29,6 +34,9 @@ fun HeroBrowser(navController: NavController) {
 
     heroRepository.searchByName(searchTerm) { result ->
       if (result is Result.Success) {
+        result.data!!.forEach { hero ->
+          hero.isFavorite = heroRepository.existsById(hero)
+        }
         setHeroes(result.data!!)
       }
       else {

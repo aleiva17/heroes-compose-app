@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.aleiva.hcompose.data.local.AppDatabase
 import com.aleiva.hcompose.data.model.Hero
 import com.aleiva.hcompose.repository.HeroRepository
 import com.aleiva.hcompose.ui.heroexplorer.components.HeroDetailBiography
@@ -19,9 +21,11 @@ import com.aleiva.hcompose.utils.Result
 
 @Composable
 fun HeroDetail(id: String) {
+  val context = LocalContext.current
   val (hero, setHero) = remember { mutableStateOf<Hero?>(null) }
   val (isLoading, setIsLoading) = remember { mutableStateOf(true) }
-  val heroRepository = HeroRepository()
+  val heroDao = AppDatabase.getInstance(context).heroDao()
+  val heroRepository = HeroRepository(heroDao = heroDao)
 
   heroRepository.searchById(id) { result ->
     if (result is Result.Success) {

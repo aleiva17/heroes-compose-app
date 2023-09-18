@@ -1,6 +1,8 @@
 package com.aleiva.hcompose.repository
 
+import com.aleiva.hcompose.data.local.HeroDao
 import com.aleiva.hcompose.data.model.Hero
+import com.aleiva.hcompose.data.model.HeroEntity
 import com.aleiva.hcompose.data.remote.ApiClient
 import com.aleiva.hcompose.data.remote.HeroResponse
 import com.aleiva.hcompose.data.remote.HeroService
@@ -10,7 +12,8 @@ import retrofit2.Response
 import com.aleiva.hcompose.utils.Result
 
 class HeroRepository (
-  private val heroService: HeroService = ApiClient.getHeroService()
+  private val heroService: HeroService = ApiClient.getHeroService(),
+  private val heroDao: HeroDao
 ) {
 
   fun searchByName(name: String, callback: (Result<List<Hero>>) -> Unit) {
@@ -55,4 +58,15 @@ class HeroRepository (
     })
   }
 
+  fun save(hero: Hero) {
+    heroDao.save(HeroEntity(hero.id))
+  }
+
+  fun delete(hero: Hero) {
+    heroDao.delete(HeroEntity(hero.id))
+  }
+
+  fun existsById(hero: Hero): Boolean {
+    return heroDao.getById(hero.id) != null;
+  }
 }

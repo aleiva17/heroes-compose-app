@@ -19,18 +19,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.aleiva.hcompose.data.local.AppDatabase
 import com.aleiva.hcompose.data.model.Hero
+import com.aleiva.hcompose.repository.HeroRepository
 import com.aleiva.hcompose.ui.navigation.Routes
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun HeroCard(hero: Hero, navController: NavController) {
+  val context = LocalContext.current
   val (isFavorite, setIsFavorite) = remember { mutableStateOf(hero.isFavorite)}
-
+  val heroDao = AppDatabase.getInstance(context).heroDao()
+  val heroRepository = HeroRepository(heroDao = heroDao)
 
   Card(
     modifier = Modifier
@@ -55,9 +60,11 @@ fun HeroCard(hero: Hero, navController: NavController) {
       }
       IconButton(modifier = Modifier.weight(1f), onClick = {
         if (isFavorite) {
-//          deleteHero()
+          hero.isFavorite = false
+          heroRepository.delete(hero)
         } else {
-//          insertHero()
+          hero.isFavorite = true
+          heroRepository.save(hero)
         }
         setIsFavorite(!isFavorite)
       }) {
